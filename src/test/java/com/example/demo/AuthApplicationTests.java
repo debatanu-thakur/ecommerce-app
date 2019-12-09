@@ -85,11 +85,14 @@ public class AuthApplicationTests {
         when(itemRepository.save(any(Item.class))).thenReturn(item);
         when(itemRepository.findByName(any(String.class))).thenReturn(order.getItems());
         when(itemRepository.findById(any(Long.class))).thenReturn(Optional.of(item));
+        when(itemRepository.findAll()).thenReturn(items);
+
         when(orderRepository.save(any(UserOrder.class))).thenReturn(order);
         when(orderRepository.findByUser(any(User.class))).thenReturn(allOrders);
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userRepository.findByUsername(any(String.class))).thenReturn(user);
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+
     }
 
 
@@ -163,5 +166,22 @@ public class AuthApplicationTests {
                 .andExpect(status().isOk());
 
     }
+    @Test
+    public void getItems() throws Exception {
+        mockMvc.perform(get("/api/item")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
 
+        mockMvc.perform(get("/api/item/1")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/item/name/sample-item")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk());
+    }
 }
