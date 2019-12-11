@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,6 +75,7 @@ public class AuthApplicationTests {
         Item item = new Item();
         item.setName("test");
         item.setId(1L);
+        item.setPrice(new BigDecimal(50.0));
         List<Item> items = new ArrayList<>();
         items.add(item);
         cart.setItems(items);
@@ -143,12 +145,12 @@ public class AuthApplicationTests {
     }
 
     @Test
-    public void addAndRemoveFromCard() throws Exception {
+    public void addAndRemoveFromCart() throws Exception {
         CreateUserRequest req = new CreateUserRequest();
         req.setUsername("foo");
         ModifyCartRequest modReq = new ModifyCartRequest();
         modReq.setItemId(1L);
-        modReq.setQuantity(0);
+        modReq.setQuantity(1);
         modReq.setUsername(req.getUsername());
         mockMvc.perform(post("/api/user/create")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
