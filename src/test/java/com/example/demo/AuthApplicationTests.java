@@ -24,6 +24,8 @@ import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.Gson;
+import org.springframework.test.web.servlet.ResultActions;
+
 import static org.hamcrest.Matchers.hasSize;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,49 +55,54 @@ public class AuthApplicationTests {
 
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
-    private CartRepository cartRepository;
-    @MockBean
-    private ItemRepository itemRepository;
-    @MockBean
-    private OrderRepository orderRepository;
+//    @MockBean
+//    private CartRepository cartRepository;
+//    @MockBean
+//    private ItemRepository itemRepository;
+//    @MockBean
+//    private OrderRepository orderRepository;
+//    @MockBean
+//    private BCryptPasswordEncoder bCryptPasswordEncoder;
+//
+//    @MockBean
+//    private UserRepository userRepository;
 
-    @MockBean
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
     private UserRepository userRepository;
 
     private Gson gson;
+    private static User user;
+    private static String authorizationToken;
+    private CreateUserRequest createUserRequest;
 
     @Before
-    public void setupService() {
+    public void setupService() throws Exception {
         gson = new Gson();
-        User user = new User();
-        user.setUsername("foo");
-        user.setId(1L);
-        Cart cart = new Cart();
-        cart.setId(1L);
-        user.setCart(cart);
-        Item item = new Item();
-        item.setName("test");
-        item.setId(1L);
-        item.setPrice(new BigDecimal(50.0));
-        List<Item> items = new ArrayList<>();
-        items.add(item);
-        cart.setItems(items);
-        UserOrder order = UserOrder.createFromCart(user.getCart());
-        List<UserOrder> allOrders = new ArrayList<>();
-        allOrders.add(order);
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
-        when(cartRepository.findByUser(any(User.class))).thenReturn(cart);
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
-        when(itemRepository.findByName(any(String.class))).thenReturn(order.getItems());
-        when(itemRepository.findById(any(Long.class))).thenReturn(Optional.of(item));
-        when(itemRepository.findAll()).thenReturn(items);
+        createUserRequest = new CreateUserRequest();
+        createUserRequest.setUsername("foo");
+        createUserRequest.setPassword("foo@1234");
+        if(user == null) {
+            mockMvc.perform(post("/api/user/create")
+            .contentType(MediaType.APPLICATION_JSON_UTF8)
+            .content(gson.toJson(createUserRequest)))
+            .andExpect(status().isOk());
+            user = userRepository.findByUsername("foo");
+            ResultActions res = mockMvc.perform(post("/login")
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .content(gson.toJson(createUserRequest)))
+                    .andExpect(status().isOk());
 
-        when(orderRepository.save(any(UserOrder.class))).thenReturn(order);
-        when(orderRepository.findByUser(any(User.class))).thenReturn(allOrders);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userRepository.findByUsername(any(String.class))).thenReturn(user);
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+            authorizationToken = res.andReturn().getResponse().getHeader("Authorization");
+        }
 
     }
 
@@ -102,86 +111,121 @@ public class AuthApplicationTests {
 	public void contextLoads() {
 	}
 
+    @Test
+    public void getUserWithoutAut() throws Exception {
+        mockMvc.perform(get("/api/user/foo")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void createUserWithLessPwdLength() throws Exception {
+        CreateUserRequest req = new CreateUserRequest();
+        req.setUsername("foo2");
+        req.setPassword("foo@12");
+        mockMvc.perform(post("/api/user/create")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(gson.toJson(req))
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isBadRequest());
+    }
+
 	@Test
     public void createAndGetUser() throws Exception {
+        gson = new Gson();
         CreateUserRequest req = new CreateUserRequest();
-        req.setUsername("foo");
-        mockMvc.perform(post("/api/user/create")
+        req.setUsername("foo2");
+        req.setPassword("foo@2345");
+        ResultActions res = mockMvc.perform(post("/api/user/create")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(gson.toJson(req)))
+                .andExpect(status().isOk());
+        User newUser = gson.fromJson(res.andReturn().getResponse().getContentAsString() , User.class) ;
+        res = mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(gson.toJson(req)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/user/foo")
+        String token = res.andReturn().getResponse().getHeader("Authorization");
+        mockMvc.perform(get("/api/user/foo2")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization", token)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(jsonPath("$.id").value(newUser.getId()));
 
-        mockMvc.perform(get("/api/user/id/1")
+        mockMvc.perform(get("/api/user/id/" + Long.toString(newUser.getId()))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization", token)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("foo"));
+                .andExpect(jsonPath("$.username").value("foo2"));
     }
 
     @Test
     public void submitAndGetOrder() throws Exception {
-        CreateUserRequest req = new CreateUserRequest();
-        req.setUsername("foo");
-        mockMvc.perform(post("/api/user/create")
+
+        ModifyCartRequest modReq = new ModifyCartRequest();
+        modReq.setItemId(1L);
+        modReq.setQuantity(1);
+        modReq.setUsername(createUserRequest.getUsername());
+
+        mockMvc.perform(post("/api/cart/addToCart")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(gson.toJson(req)))
+                .header("Authorization", authorizationToken)
+                .content(gson.toJson(modReq)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/order/submit/foo")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(req.getUsername()))
+                .header("Authorization", authorizationToken)
+                .content(createUserRequest.getUsername()))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/order/history/foo")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization", authorizationToken)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$[0].items", hasSize(1)));
     }
 
     @Test
     public void addAndRemoveFromCart() throws Exception {
-        CreateUserRequest req = new CreateUserRequest();
-        req.setUsername("foo");
         ModifyCartRequest modReq = new ModifyCartRequest();
         modReq.setItemId(1L);
         modReq.setQuantity(1);
-        modReq.setUsername(req.getUsername());
-        mockMvc.perform(post("/api/user/create")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(gson.toJson(req)))
-                .andExpect(status().isOk());
+        modReq.setUsername(createUserRequest.getUsername());
 
         mockMvc.perform(post("/api/cart/addToCart")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization", authorizationToken)
                 .content(gson.toJson(modReq)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/cart/removeFromCart")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .header("Authorization", authorizationToken)
                 .content(gson.toJson(modReq)))
                 .andExpect(status().isOk());
 
     }
+
+
     @Test
     public void getItems() throws Exception {
-        mockMvc.perform(get("/api/item")
+        mockMvc.perform(get("/api/item/")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(2)));
 
         mockMvc.perform(get("/api/item/1")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/item/name/sample-item")
+        mockMvc.perform(get("/api/item/name/Round Widget")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
