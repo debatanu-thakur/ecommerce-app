@@ -2,6 +2,8 @@ package com.example.demo.controllers;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,8 @@ public class UserController {
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+	private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
 	@GetMapping("/id/{id}")
 	public ResponseEntity<User> findById(@PathVariable Long id) {
 		return ResponseEntity.of(userRepository.findById(id));
@@ -41,7 +45,17 @@ public class UserController {
 	
 	@GetMapping("/{username}")
 	public ResponseEntity<User> findByUserName(@PathVariable String username) {
-		User user = userRepository.findByUsername(username);
+		User user = null;
+		try {
+			user = userRepository.findByUsername(username);
+			if (user == null) {
+				log.warn("No user found");
+			}
+		} catch (Exception ex) {
+			log.error("Exception while fetching user with " + username);
+			log.warn(ex.getMessage());
+			log.trace("getUserByUserNameFailure", 1);
+		}
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}
 	
@@ -49,12 +63,21 @@ public class UserController {
 	public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
 
 		User user = new User();
-		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
-		user.setUsername(createUserRequest.getUsername());
-		Cart cart = new Cart();
-		cartRepository.save(cart);
-		user.setCart(cart);
-		userRepository.save(user);
+		try {
+			user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
+			user.setUsername(createUserRequest.getUsername());
+			Cart cart = new Cart();
+			cartRepository.save(cart);
+			user.setCart(cart);
+			userRepository.save(user);
+			log.info("User created successfully");
+			log.trace("CreateUserSuccess", 1);
+		} catch (Exception ex) {
+			log.error("Error while creating user");
+			log.warn(ex.getMessage());
+			log.trace("CreateUserFailure", 1);
+
+		}
 		return ResponseEntity.ok(user);
 	}
 	

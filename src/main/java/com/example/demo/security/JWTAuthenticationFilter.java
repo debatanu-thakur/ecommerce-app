@@ -1,9 +1,12 @@
 package com.example.demo.security;
 
 import com.auth0.jwt.JWT;
+import com.example.demo.controllers.UserController;
 import com.example.demo.model.persistence.User;
 import com.example.demo.model.requests.CreateUserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+    private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
     private AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -36,7 +39,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         try {
             CreateUserRequest creds = new ObjectMapper()
                     .readValue(req.getInputStream(), CreateUserRequest.class);
-
+            log.trace("AuthenticationSuccess", 1);
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             creds.getUsername(),
@@ -44,6 +47,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             new ArrayList<>())
             );
         } catch (IOException e) {
+            log.error("Error authentication user");
+            log.warn(e.getMessage());
+            log.trace("AuthenticationFailure", 1);
             throw new RuntimeException(e);
         }
     }
@@ -54,10 +60,16 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        String token = JWT.create()
-                .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(HMAC512(SECRET.getBytes()));
+        String token = "";
+        try {
+            token = JWT.create()
+                    .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .sign(HMAC512(SECRET.getBytes()));
+        } catch (Exception ex) {
+            log.error("Error creating jwt token");
+            log.warn(ex.getMessage());
+        }
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
     }
 
