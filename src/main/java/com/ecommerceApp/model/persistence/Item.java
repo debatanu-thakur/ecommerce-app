@@ -1,4 +1,4 @@
-package com.example.demo.model.persistence;
+package com.ecommerceApp.model.persistence;
 
 import java.math.BigDecimal;
 

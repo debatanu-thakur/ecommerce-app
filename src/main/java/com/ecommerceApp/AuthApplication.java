@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.ecommerceApp;
 
 import com.sun.org.apache.xerces.internal.parsers.SecurityConfiguration;
 import org.springframework.boot.SpringApplication;
@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@EnableJpaRepositories("com.example.demo.model.persistence.repositories")
-@EntityScan("com.example.demo.model.persistence")
+@EnableJpaRepositories("com.ecommerceApp.model.persistence.repositories")
+@EntityScan("com.ecommerceApp.model.persistence")
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class AuthApplication {
 

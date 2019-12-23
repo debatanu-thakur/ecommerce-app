@@ -1,15 +1,16 @@
-package com.example.demo;
+package com.ecommerceApp;
 
-import com.example.demo.model.persistence.Cart;
-import com.example.demo.model.persistence.Item;
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.UserOrder;
-import com.example.demo.model.persistence.repositories.CartRepository;
-import com.example.demo.model.persistence.repositories.ItemRepository;
-import com.example.demo.model.persistence.repositories.OrderRepository;
-import com.example.demo.model.persistence.repositories.UserRepository;
-import com.example.demo.model.requests.CreateUserRequest;
-import com.example.demo.model.requests.ModifyCartRequest;
+import com.ecommerceApp.model.persistence.Cart;
+import com.ecommerceApp.model.persistence.Item;
+import com.ecommerceApp.model.persistence.User;
+import com.ecommerceApp.model.persistence.UserOrder;
+import com.ecommerceApp.model.persistence.repositories.CartRepository;
+import com.ecommerceApp.model.persistence.repositories.ItemRepository;
+import com.ecommerceApp.model.persistence.repositories.OrderRepository;
+import com.ecommerceApp.model.persistence.repositories.UserRepository;
+import com.ecommerceApp.model.requests.CreateUserRequest;
+import com.ecommerceApp.model.requests.ModifyCartRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +21,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -36,10 +39,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.Gson;
+
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.hasSize;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;

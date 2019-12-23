@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.ecommerceApp.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +13,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static com.example.demo.security.SecurityConstants.ITEMS_URL;
-import static com.example.demo.security.SecurityConstants.SIGN_UP_URL;
+import static com.ecommerceApp.security.SecurityConstants.ITEMS_URL;
+import static com.ecommerceApp.security.SecurityConstants.SIGN_UP_URL;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
