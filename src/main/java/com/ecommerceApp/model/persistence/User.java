@@ -1,4 +1,4 @@
-package com.example.demo.model.persistence;
+package com.ecommerceApp.model.persistence;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

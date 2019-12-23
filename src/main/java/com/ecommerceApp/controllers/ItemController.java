@@ -1,4 +1,4 @@
-package com.example.demo.controllers;
+package com.ecommerceApp.controllers;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.model.persistence.Item;
-import com.example.demo.model.persistence.repositories.ItemRepository;
+import com.ecommerceApp.model.persistence.Item;
+import com.ecommerceApp.model.persistence.repositories.ItemRepository;
 
 @RestController
 @RequestMapping("/api/item")

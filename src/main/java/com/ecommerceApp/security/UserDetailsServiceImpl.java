@@ -1,7 +1,8 @@
-package com.example.demo.security;
+package com.ecommerceApp.security;
 
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.persistence.repositories.UserRepository;
+import com.ecommerceApp.model.persistence.User;
+import com.ecommerceApp.model.persistence.repositories.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

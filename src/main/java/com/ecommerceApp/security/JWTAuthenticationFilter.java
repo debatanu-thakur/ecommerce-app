@@ -1,10 +1,11 @@
-package com.example.demo.security;
+package com.ecommerceApp.security;
 
 import com.auth0.jwt.JWT;
-import com.example.demo.controllers.UserController;
-import com.example.demo.model.persistence.User;
-import com.example.demo.model.requests.CreateUserRequest;
+import com.ecommerceApp.controllers.UserController;
+import com.ecommerceApp.model.persistence.User;
+import com.ecommerceApp.model.requests.CreateUserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,13 +15,16 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-import static com.example.demo.security.SecurityConstants.*;
 
+
+
+import static com.ecommerceApp.security.SecurityConstants.*;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
