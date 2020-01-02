@@ -49,6 +49,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+//curl  --header "Content-type: application/json"  --request POST  --data "{"""username""":"""arka""","""password""":"""#pass1234s"""}"  http://localhost:8090/api/user/create
+//
+//	 http://localhost:8090/api/user/id/1
+//	 
+//	 curl --header "Content-type: application/json"  --request POST  --data "{"""username""":"""arka""","""password""":"""#pass1234s"""}" http://localhost:8090/login
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
