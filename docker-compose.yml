@@ -5,3 +5,4 @@ services:
     restart: always
     ports:
       - 8100:8100
+      - 514:514
