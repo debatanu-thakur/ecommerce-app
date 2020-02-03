@@ -12,7 +12,10 @@ The features include
 
 ## How To Run
 1. Have Java 1.8 installed
+2. To test, run `mvn test`
+3. To run the application make sure port 8100 is available, and then run `mvn spring-boot:run` or `docker-compose up -d`
+4. Then you can test the application in http://localhost:8100
+5. The jenkins build files are found in `jenkins_home` folder and the splunk screenshots in `dashboard` folder.
 
-6. To test, run `mvn test`
 ### License
 MIT
