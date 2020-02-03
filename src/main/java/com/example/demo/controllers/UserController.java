@@ -65,6 +65,7 @@ public class UserController {
 	public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
 
 		User user = new User();
+		log.info("User creation started");
 		try {
 			user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 			user.setUsername(createUserRequest.getUsername());
@@ -72,13 +73,11 @@ public class UserController {
 			cartRepository.save(cart);
 			user.setCart(cart);
 			userRepository.save(user);
-			log.info("User created successfully");
-			log.trace("CreateUserSuccess", 1);
+			log.info("CreateUserSuccess", 1);
 		} catch (Exception ex) {
 			log.error("Error while creating user");
 			log.warn(ex.getMessage());
-			log.trace("CreateUserFailure", 1);
-
+			log.info("CreateUserFailure", 1);
 		}
 		return ResponseEntity.ok(user);
 	}
